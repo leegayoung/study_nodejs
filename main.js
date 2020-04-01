@@ -64,7 +64,13 @@ if(pathname === '/'){
         var list = templateList(filelist);
 
         var template = templateHtml(title,list,`<h2>${title}</h2>${description}</p>`,
-        `<a href="/create">create</a> <a href="/update?id=${title}">update</a>`);
+        `<a href="/create">create</a>
+        <a href="/update?id=${title}">update</a>
+        <form action="delete_process" method="post" onsubmit="">
+          <input type="hidden" name="id" value="${title}">
+          <input type="submit" value="delete">
+        </form>
+        `);
 
         response.writeHead(200);
         response.end(template);
@@ -157,6 +163,22 @@ else if(pathname == "/update_process"){
           response.writeHead(302,{Location:`/?id=${title}`});
           response.end('success');
         })
+      });
+  });
+}
+else if(pathname == "/delete_process"){
+  var body = '';
+  //넘어온 값이 많을것을 대비하여 나눠서 수신
+  request.on('data',function(data){
+      body = body + data;
+  });
+  //모든 데이타가 다 넘어오고 정보 수신이 끝났을때
+  request.on('end',function(){
+      var post = qs.parse(body);
+      var id = post.id;
+      fs.unlink(`data/${id}`,function(error){
+        response.writeHead(302,{Location:`/`});
+        response.end();
       });
   });
 }
